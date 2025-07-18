@@ -1,6 +1,8 @@
 # 🔍 ELK 스택을 이용한 소비 패턴 분석 프로젝트
 
-로그 시각화 실습 및 ELK 학습을 위한 프로젝트입니다. Ubuntu 가상 머신에 ELK 스택(Elasticsearch, Logstash, Kibana)을 설치하여 카드 데이터에 대한 시각화를 진행했습니다.
+Ubuntu 가상 머신에 ELK 스택(Elasticsearch, Logstash, Kibana)을 설치하여 카드 데이터에 대한 시각화를 진행했습니다.
+
+Life Stage (대학생, 신혼, 은퇴자 등) 기준으로 분기별 소비 건수 추이를 통해 이탈 가능성이 있는 소비층을 분석했습니다.
 
 > ✅ Filebeat → Logstash → Elasticsearch → Kibana 파이프라인을 구축
 > 
@@ -12,16 +14,24 @@
 
 ---
 
+## **👥 팀원 소개**
+
+| <img width="150px" src="https://avatars.githubusercontent.com/u/52108628?v=4"/> | <img width="150px" src="https://avatars.githubusercontent.com/u/156065214?v=4"/> | <img width="150px" src="https://avatars.githubusercontent.com/u/81912226?v=4"> |
+| --- | --- | --- |
+| **고태우** | 임유진 | **정서현** |
+| [@kohtaewoo](https://github.com/kohtaewoo) | [@imewuzin](https://github.com/imewuzin) | [@hyunn522](https://github.com/hyunn522) |
+
 ## 🧱 시스템 아키텍처
 
 <img src="https://file.notion.so/f/f/9d9842c3-5bb3-4aea-84bd-5315dfa61386/ebdbd4ae-c5b6-45f0-9e03-3482d98e37c0/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2025-07-17_154544.png?table=block&id=2338416c-e9f3-8078-b6b4-d0c63debc00c&spaceId=9d9842c3-5bb3-4aea-84bd-5315dfa61386&expirationTimestamp=1752775200000&signature=BmEzrc7gkyR8Znq2WLglobN5GC03H9OYLipWe9HzwDo&downloadName=%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7+2025-07-17+154544.png"/>
 
 | 구성 요소 | 설명 |
 | --- | --- |
-| **Elasticsearch** | 로그 데이터를 저장하고 검색 |
-| **Logstash** | 수신된 로그를 필터링/정제 |
-| **Kibana** | Elasticsearch 데이터를 시각화 |
-| **Filebeat**  | CSV 로그 파일을 실시간으로 전송 |
+| **Elasticsearch (v7.11.2)** | 로그 데이터를 저장하고 검색 |
+| **Logstash (v7.11.2)** | 수신된 로그를 필터링/정제 |
+| **Kibana (v7.11.2)** | Elasticsearch 데이터를 시각화 |
+| **Filebeat (v7.11.2)** | CSV 로그 파일을 실시간으로 전송 |
+| Ubuntu (v24.04.2) | ELK 파이프라인 구축을 위한 가상 환경 |
 
 ```
 [개인 PC (Windows)]
@@ -33,7 +43,6 @@
 
 [Windows 브라우저]
   ↳ <http://192.168.0.X:5601>
-
 ```
 
 > ✅ VirtualBox는 "브리지 어댑터"로 설정하여 동일 네트워크에서 접속 가능하게 구성
@@ -105,7 +114,7 @@ filter {
     split => ["message", ","]
     add_field => {
       "기준 시점"           => "%{[message][0]}"
-      "고객 번호"              => "%{[message][1]}"
+      "고객 번호"           => "%{[message][1]}"
       ...
     }
 
@@ -113,21 +122,21 @@ filter {
     remove_field => ["message", "ecs", "host", "agent", "@version", "input", "tags", "log", "@timestamp"]
   }
   
-  if [SEX_CD] == "1" {
+  if [성별] == "1" {
     mutate {
-      update => { "SEX_CD" => "남" }
+      update => { "성별" => "남" }
     }
-  } else if [SEX_CD] == "2" {
+  } else if [성별] == "2" {
     mutate {
-      update => { "SEX_CD" => "여" }
+      update => { "성별" => "여" }
     }
   }
 
-  if [AGE] >= 65 {
+  if [나이] >= 65 {
     drop { }
   }
 
-	if ![BAS_YH] or [BAS_YH] =~ /^.{0,5}$/ or [BAS_YH] =~ /^.{7,}$/ {
+	if ![기준 시점] or [기준 시점] =~ /^.{0,5}$/ or [기준 시점] =~ /^.{7,}$/ {
 	  drop { }
 	}
 }
@@ -143,7 +152,6 @@ output {
     index => "cardfisa"
   }
 }
-
 ```
 
 - 성별 칼럼의 int 값에 따라 `“남”`, `“여”` string으로 저장
@@ -204,18 +212,19 @@ filebeat.exe -e -c filebeat.yml
 
 ## 🚀 트러블 슈팅
 
-### 1. 🔒 외부 포트 개방 포기 → 내부망 브리지 모드로 전환
+### 1. 🔒 외부 포트 대신 내부망 브리지 모드로 전환
 
-초기에는 공인 IP(`118.XXX.XXX.XXX`)를 통해 외부에서 Kibana에 접근하려 했으나, **보안상 포트를 개방하지 않기로 결정**하였습니다.
+**문제점**
 
-| 이유 | 설명 |
-| --- | --- |
-| Kibana는 기본 인증이 없음 | 외부에 노출되면 누구나 대시보드, 로그 확인 가능 |
-| Elasticsearch는 API로 조작 가능 | 공격자가 데이터 조회, 삽입, 삭제 가능 |
-| 보안 미구현 시 실질적 침해 가능 | 실제 사고 사례 다수 존재함 |
+- 공인 IP(`118.XXX.XXX.XXX`)를 통해 외부에서 Kibana에 접근하려 했으나, **보안상 포트를 개방하지 않기로 결정**하였습니다.
 
-✅ **대안 |** 내부망(LAN) 기반 브리지 모드 사용
+**원인**
 
+- Kibana는 기본 인증이 없어서, 외부에 노출되면 누구나 대시보드와 로그를 확인할 수 있습니다. 또한 외부에서 ElasticSearch에 데이터 조회, 삽입, 삭제 등을 통해 공격할 수 있습니다.
+
+**해결 방안**
+
+- 내부망(LAN) 기반 브리지 모드 사용
 - VirtualBox의 네트워크 모드를 **브리지 어댑터**로 설정
 - **Windows ↔ Ubuntu VM 간 내부 IP로만 통신 허용**
 - 외부 인터넷에서는 절대 접근 불가 → 보안 확보
@@ -226,15 +235,15 @@ filebeat.exe -e -c filebeat.yml
 
 **문제점**
 
-- 기본 NAT 모드에서는 외부(호스트)에서 게스트(VM) 포트(`9200`, `5601`) 접근 불가. 포트포워딩 없이는 통신이 차단됨.
+- 기본 NAT 모드에서는 외부(호스트)에서 게스트(VM) 포트(`9200`, `5601`) 접근할 수 없습니다. 포트포워딩 없이는 통신이 차단됩니다.
 
 **원인**
 
-- Kibana, Elasticsearch는 외부 접근 기반 시각화가 필요하지만 NAT에서는 접속 불가.
+- Kibana, Elasticsearch는 외부 접근 기반 시각화가 필요하지만 NAT에서는 접속이 불가합니다.
 
 **해결 방법**
 
-- VirtualBox를 **브리지 어댑터**로 변경하여 **같은 네트워크 상에서 직접 접근 가능**하도록 구성 → 별도 포트포워딩 없이 통신 가능.
+- VirtualBox를 **브리지 어댑터**로 변경하여 **같은 네트워크 상에서 직접 접근 가능**하도록 구성하였습니다. 이에 따라서 별도 포트포워딩 없이 통신 가능하게 되었습니다.
 
 ---
 
@@ -242,7 +251,7 @@ filebeat.exe -e -c filebeat.yml
 
 **문제점**
 
-- 다음 필드가 누락됨
+- 다음 필드가 누락되었습니다.
     
     ```yaml
     node.name: node-1
@@ -252,11 +261,11 @@ filebeat.exe -e -c filebeat.yml
 
 **문제 원인**
 
-- Elasticsearch는 초기 클러스터 형성을 위해 마스터 노드 정보를 필요로 함. 위 설정 없을 경우 **단일 노드임에도 부팅 실패** 발생.
+- ElasticSearch 7.x 버전부터는 노드 간 분리되는 것을 위해 마스터 노드를 명시적으로 설정해야 합니다.
 
 **해결 방법**
 
-- 위 두 설정을 명시적으로 추가.
+- 위 두 설정을 명시적으로 추가했습니다.
 
 ---
 
@@ -264,15 +273,11 @@ filebeat.exe -e -c filebeat.yml
 
 **문제점**
 
-- 초기 VM 사양이 2 vCPU / 4GB RAM에 불과하여 Elasticsearch + Logstash를 동시에 실행 시 과부하 발생.
-
-**문제 원인**
-
-- JVM 기반 서비스는 메모리 소비가 크며, Garbage Collection 지연과 함께 OutOfMemory로 인한 다운 발생.
+- 초기 VM 사양이 2 vCPU / 4GB RAM였기에 Elasticsearch + Logstash를 동시에 실행 시 과부하가 발생했습니다.
 
 **해결 방법**
 
-- VM 사양을 **4 vCPU / 8GB RAM**으로 상향 조정 → 서비스 안정화 성공.
+- VM 사양을 **4 vCPU / 8GB RAM**으로 상향 조정하여 서비스를 안정화시켰습니다.
 
 ---
 
@@ -280,54 +285,55 @@ filebeat.exe -e -c filebeat.yml
 
 **문제점**
 
-- `TOT_USE_AM`, `AGE` 등 수치 필드가 빈 문자열("") 또는 null 상태일 때, `integer` 변환 시도 → 예외 발생.
+- `총 소비금액`, `나이` 등 수치 필드가 빈 문자열("") 또는 null 상태일 때, `integer` 변환을 시도해서 예외가 발생했습니다.
 
 **문제 원인**
 
-- Logstash는 빈 값에 대해 변환 실패 시 파이프라인 전체가 중단됨.
-- `integer` 타입이어야 Kibana에서 `sum`, `avg` 등 수치 집계가 가능함.
+- Logstash는 빈 값에 대해 변환 실패 시 파이프라인 전체가 중단됩니다.
 
 **해결 방법**
 
 - 타입 변환 전 조건문으로 값 유효성 체크 추가
     
     ```ruby
-    if [TOT_USE_AM] != "" {
-      mutate { convert => { "TOT_USE_AM" => "integer" } }
+    if [총 소비금액] != "" {
+      mutate { convert => { "총 소비금액" => "integer" } }
     }
     ```
     
+
 ---
 
 ### 6. Logstash 조건 비교 오류 (SEX_CD 변환)
 
 **문제점**
 
-- `if [SEX_CD] == "1"` 처럼 문자열 비교를 했지만, 실제 데이터는 숫자(1) → 조건 불일치.
+- `if [성별] == "1"` 처럼 문자열 비교를 했지만, 실제 데이터는 숫자(1)이라 조건이 일치하지 않았습니다.
 
 **문제 원인**
 
-- Logstash는 `"1"`(문자열)과 `1`(숫자)를 구분함 → 타입 불일치로 인해 조건문 실행되지 않음.
+- Logstash는 `"1"`(문자열)과 `1`(숫자)를 구분함에 따라, 타입 불일치로 인해 조건문이 실행되지 않았습니다.
 
 **해결 방법**:
 
-- **옵션 1**: 문자열로 변환 후 비교
+- **방법 1**: 문자열로 변환 후 비교
     
     ```ruby
-    mutate { convert => { "SEX_CD" => "string" } }
-    if [SEX_CD] == "1" {
-      mutate { update => { "SEX_CD" => "남" } }
+    mutate { convert => { "성별" => "string" } }
+    if [성별] == "1" {
+      mutate { update => { "성별" => "남" } }
     }
     ```
     
-- **옵션 2**: 숫자 그대로 비교
+- **방법 2**: 숫자 그대로 비교
     
     ```ruby
-    if [SEX_CD] == 1 {
-      mutate { update => { "SEX_CD" => "남" } }
+    if [성별] == 1 {
+      mutate { update => { "성별" => "남" } }
     }
     ```
     
+
 ---
 
 ## 🌕 회고 및 소감
@@ -335,3 +341,5 @@ filebeat.exe -e -c filebeat.yml
 외부 접근을 허용하려면 단순히 포트를 여는 것 이상으로 고려해야 할 설정이 많았다.
 
 또한 실제 데이터를 시각화하면서 **타입 변환, 필드 명명, 값 유효성** 등 사소해 보이던 요소들이 분석 정확도에 큰 영향을 준다는 걸 느꼈다.
+
+csv 파일의 칼럼을 logstash로 변환해올 때 칼럼명을 실제 작업할 때 알아보기 더 쉬운 이름으로 바꾸면 시각화하기 좀 더 편리했을 것 같다.
