@@ -1,11 +1,11 @@
 # Plz Don't Go
 ![logo](./image/logo.png)
+
 Ubuntu 가상 머신에 ELK 스택(Elasticsearch, Logstash, Kibana)을 설치하여 카드 데이터에 대한 시각화를 진행했습니다.
 
 Life Stage (대학생, 신혼, 은퇴자 등) 기준으로 분기별 소비 건수 추이를 통해 이탈 가능성이 있는 소비층을 분석했습니다.
 
 > ✅ Filebeat → Logstash → Elasticsearch → Kibana 파이프라인을 구축
-> 
 > 
 > ✅ VirtualBox 기반 내부망(LAN) 접속
 > 
@@ -216,8 +216,7 @@ filebeat.exe -e -c filebeat.yml
 
 - 의무교육을 받는 자녀를 둔 학부모 카테고리와 대학생 자녀를 둔 학부모 카테고리가 각각 26.11%, 23.54%로 가장 높은 비율을 차지했습니다.
 
-> 따라서 의무교육을 받는 자녀를 둔 학부모와 대학생 자녀를 둔 학부모를 타겟으로 설정하였습니다.
-
+> 따라서 **의무교육을 받는 자녀를 둔 학부모와 대학생 자녀를 둔 학부모를 타겟으로 설정**하였습니다.
 
 ### 타겟 고객 중 신용/체크카드 사용량 비율 & 성별에 따른 비율
 ![타겟 고객 중 신용/체크카드 사용량 비율 & 성별에 따른 비율](./image/체크신용카드별_성별별.png)
@@ -233,7 +232,7 @@ filebeat.exe -e -c filebeat.yml
 
 ## 🚀 트러블 슈팅
 
-### 1. 외부 포트 대신 내부망 브리지 모드로 전환
+### 1️⃣ 외부 포트 대신 내부망 브리지 모드로 전환
 
 **문제점**
 
@@ -252,7 +251,7 @@ filebeat.exe -e -c filebeat.yml
 
 ---
 
-### 2. VirtualBox 네트워크 설정 문제 (NAT → 브리지 전환)
+### 2️⃣ VirtualBox 네트워크 설정 문제 (NAT → 브리지 전환)
 
 **문제점**
 
@@ -268,7 +267,7 @@ filebeat.exe -e -c filebeat.yml
 
 ---
 
-### 3. Elasticsearch 설정 누락 (elasticsearch.yml)
+### 3️⃣ Elasticsearch 설정 누락 (elasticsearch.yml)
 
 **문제점**
 
@@ -291,7 +290,7 @@ filebeat.exe -e -c filebeat.yml
 
 ---
 
-### 4. VM 리소스 부족 (JVM 기반 서비스 다운)
+### 4️⃣ VM 리소스 부족 (JVM 기반 서비스 다운)
 
 **문제점**
 
@@ -311,7 +310,7 @@ if [총 소비금액] != "" {
 
 ---
 
-### 5. Logstash 조건 비교 오류 (SEX_CD 변환)
+### 5️⃣ Logstash 조건 비교 오류 (성별 칼럼 변환)
 
 **문제점**
 
