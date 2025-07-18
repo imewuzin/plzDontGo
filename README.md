@@ -109,7 +109,7 @@ input {
 }
 
 filter {
-	# CSV 형태의 message 필드를 분리하여 새로운 필드로 재구성
+  # CSV 형태의 message 필드를 분리하여 새로운 필드로 재구성
   mutate {
     split => ["message", ","]
     add_field => {
@@ -118,7 +118,7 @@ filter {
       ...
     }
 
-		# 불필요한 기본 필드 제거
+    # 불필요한 기본 필드 제거
     remove_field => ["message", "ecs", "host", "agent", "@version", "input", "tags", "log", "@timestamp"]
   }
   
@@ -136,9 +136,9 @@ filter {
     drop { }
   }
 
-	if ![기준 시점] or [기준 시점] =~ /^.{0,5}$/ or [기준 시점] =~ /^.{7,}$/ {
-	  drop { }
-	}
+  if ![기준 시점] or [기준 시점] =~ /^.{0,5}$/ or [기준 시점] =~ /^.{7,}$/ {
+    drop { }
+  }
 }
 
 output {
@@ -146,7 +146,7 @@ output {
     codec => rubydebug
   }
 
-	# 처리한 데이터를 내보낼 경로 = elasticsearch
+  # 처리한 데이터를 내보낼 경로 = elasticsearch
   elasticsearch {
     hosts => ["http://localhost:9200"]
     index => "cardfisa"
