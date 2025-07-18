@@ -1,5 +1,5 @@
-# 🔍 ELK 스택을 이용한 소비 패턴 분석 프로젝트
-
+# Plz Don't Go
+![logo](./image/logo.png)
 Ubuntu 가상 머신에 ELK 스택(Elasticsearch, Logstash, Kibana)을 설치하여 카드 데이터에 대한 시각화를 진행했습니다.
 
 Life Stage (대학생, 신혼, 은퇴자 등) 기준으로 분기별 소비 건수 추이를 통해 이탈 가능성이 있는 소비층을 분석했습니다.
@@ -18,12 +18,12 @@ Life Stage (대학생, 신혼, 은퇴자 등) 기준으로 분기별 소비 건�
 
 | <img width="150px" src="https://avatars.githubusercontent.com/u/52108628?v=4"/> | <img width="150px" src="https://avatars.githubusercontent.com/u/156065214?v=4"/> | <img width="150px" src="https://avatars.githubusercontent.com/u/81912226?v=4"> |
 | --- | --- | --- |
-| **고태우** | 임유진 | **정서현** |
+| **고태우 (팀장)** | **임유진** | **정서현** |
 | [@kohtaewoo](https://github.com/kohtaewoo) | [@imewuzin](https://github.com/imewuzin) | [@hyunn522](https://github.com/hyunn522) |
 
 ## 🧱 시스템 아키텍처
 
-<img src="https://file.notion.so/f/f/9d9842c3-5bb3-4aea-84bd-5315dfa61386/ebdbd4ae-c5b6-45f0-9e03-3482d98e37c0/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2025-07-17_154544.png?table=block&id=2338416c-e9f3-8078-b6b4-d0c63debc00c&spaceId=9d9842c3-5bb3-4aea-84bd-5315dfa61386&expirationTimestamp=1752775200000&signature=BmEzrc7gkyR8Znq2WLglobN5GC03H9OYLipWe9HzwDo&downloadName=%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7+2025-07-17+154544.png"/>
+![아키텍처](./image/architecture.png)
 
 | 구성 요소 | 설명 |
 | --- | --- |
@@ -45,36 +45,33 @@ Life Stage (대학생, 신혼, 은퇴자 등) 기준으로 분기별 소비 건�
   ↳ <http://192.168.0.X:5601>
 ```
 
-> ✅ VirtualBox는 "브리지 어댑터"로 설정하여 동일 네트워크에서 접속 가능하게 구성
+> ✅ VirtualBox는 "브리지 어댑터"로 설정하여 동일 네트워크에서 접속 가능하게 구성했습니다.
 
 ---
 
 ## 🛠️ 설치 및 설정 절차
 
 ### 1️⃣ ELK 스택 설치 (Ubuntu)
+  ```bash
+  sudo apt update
 
-```bash
-# Java 설치
-sudo apt update
-sudo apt install -y openjdk-11-jdk
+  # Elasticsearch 설치
+  wget <https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.11.2-amd64.deb>
+  sudo dpkg -i elasticsearch-7.11.2-amd64.deb
+  sudo systemctl enable elasticsearch
+  sudo systemctl start elasticsearch
 
-# Elasticsearch 설치
-wget <https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.11.2-amd64.deb>
-sudo dpkg -i elasticsearch-7.11.2-amd64.deb
-sudo systemctl enable elasticsearch
-sudo systemctl start elasticsearch
+  # Kibana 설치
+  wget <https://artifacts.elastic.co/downloads/kibana/kibana-7.11.2-amd64.deb>
+  sudo dpkg -i kibana-7.11.2-amd64.deb
+  sudo systemctl enable kibana
 
-# Kibana 설치
-wget <https://artifacts.elastic.co/downloads/kibana/kibana-7.11.2-amd64.deb>
-sudo dpkg -i kibana-7.11.2-amd64.deb
-sudo systemctl enable kibana
+  # Logstash 설치
+  wget <https://artifacts.elastic.co/downloads/logstash/logstash-7.11.2-amd64.deb>
+  sudo dpkg -i logstash-7.11.2-amd64.deb
+  sudo systemctl enable logstash
 
-# Logstash 설치
-wget <https://artifacts.elastic.co/downloads/logstash/logstash-7.11.2-amd64.deb>
-sudo dpkg -i logstash-7.11.2-amd64.deb
-sudo systemctl enable logstash
-
-```
+  ```
 
 ---
 
@@ -84,7 +81,7 @@ sudo systemctl enable logstash
 sudo nano /etc/kibana/kibana.yml
 ```
 
-외부에서 kibana에 접속할 수 있도록 host 포트를 `0.0.0.0`으로 수정한다.
+외부에서 kibana에 접속할 수 있도록 host 포트를 `0.0.0.0`으로 수정했습니다.
 
 ```yaml
 server.host: "0.0.0.0"
@@ -95,7 +92,7 @@ server.host: "0.0.0.0"
 ### 3️⃣ Logstash 설정
 
 ```bash
-sudo nano /etc/logstash/conf.d/churn.conf
+sudo nano /etc/logstash/conf.d/cardfisa.conf
 ```
 
 적용한 설정:
@@ -154,9 +151,8 @@ output {
 }
 ```
 
-- 성별 칼럼의 int 값에 따라 `“남”`, `“여”` string으로 저장
-- 라이프스타일 (대학생, 신혼, 은퇴자 등)에서 은퇴자의 정확성을 높이기 위해 65세 이상의 데이터 제거
-    - 은퇴한 지 오래된 고령층은 은퇴자의 소비 특징을 흐릴 수 있어 분석에서 제외했습니다.
+- 성별 칼럼의 int 값에 따라 “남”, “여” string으로 저장했습니다
+- 은퇴한 지 오래된 고령층은 은퇴자의 소비 특징을 흐릴 수 있기 때문에 65세 이상의 데이터 제거했습니다.
 
 ```bash
 sudo systemctl start logstash
@@ -190,7 +186,7 @@ output.logstash:
 
 ```
 
-다음 명령어를 통해 Filebeat을 실행한다.
+다음 명령어를 통해 Filebeat을 실행합니다.
 
 ```powershell
 filebeat.exe -e -c filebeat.yml
@@ -208,11 +204,36 @@ filebeat.exe -e -c filebeat.yml
 
 ## 📊 시각화 결과
 
+카드 소비 내역 데이터를 통해 Life Stage를 분석하고, 가장 이탈률이 높은 Life Stage 고객층의 소비를 촉진하기 위한 솔루션을 도출했습니다.
+
+### 전체 고객의 Life Stage별 소비 건수
+![전체 고객의 Life Stage별 소비 건수](./image/2022년분기별lifestage별소비건수.png)
+
+- 2023년 데이터는 Life Stage에 따른 분류가 존재하지 않아, 2022년 데이터를 대상으로 진행하였습니다.
+
+### 2022년 소비 금액이 0원인 Life Stage
+![2022년 소비 금액이 0원인 Life Stage](./image/2022년%20소비금액이%200원인%20lifestage.png)
+
+- 의무교육을 받는 자녀를 둔 학부모 카테고리와 대학생 자녀를 둔 학부모 카테고리가 각각 26.11%, 23.54%로 가장 높은 비율을 차지했습니다.
+
+> 따라서 의무교육을 받는 자녀를 둔 학부모와 대학생 자녀를 둔 학부모를 타겟으로 설정하였습니다.
+
+
+### 타겟 고객 중 신용/체크카드 사용량 비율 & 성별에 따른 비율
+![타겟 고객 중 신용/체크카드 사용량 비율 & 성별에 따른 비율](./image/체크신용카드별_성별별.png)
+
+- 여성 고객이 남성 고객보다 지출이 많고, 신용카드 이용 비율이 더 많다는 것을 알 수 있었습니다.
+
+### 대분류별 소비 금액
+![대분류별 소비 금액](./image/대분류별.png)
+
+- 유통(19.44%), 요식업(17.16%), 보험/병원(13.34%) 대분류에서 소비양이 가장 많은 것을 알 수 있습니다.
+- 따라서 해당 분야에서의 혜택을 지원하여 이탈하는 고객을 최소화하는 것을 목표로 합니다.
 ---
 
 ## 🚀 트러블 슈팅
 
-### 1. 🔒 외부 포트 대신 내부망 브리지 모드로 전환
+### 1. 외부 포트 대신 내부망 브리지 모드로 전환
 
 **문제점**
 
@@ -261,6 +282,7 @@ filebeat.exe -e -c filebeat.yml
 
 **문제 원인**
 
+- Elasticsearch는 여러 **서버**(노드)가 협력하여 하나의 **클러스터**를 구성합니다. 따라서 **각 노드를 구별할 수 있어야** 클러스터 내에서 **누가 어떤 역할을 하고 있는지** 알 수 있습니다.
 - ElasticSearch 7.x 버전부터는 노드 간 분리되는 것을 위해 마스터 노드를 명시적으로 설정해야 합니다.
 
 **해결 방법**
@@ -281,30 +303,15 @@ filebeat.exe -e -c filebeat.yml
 
 ---
 
-### 5. Logstash 타입 변환 실패 (`mutate → convert`)
-
-**문제점**
-
-- `총 소비금액`, `나이` 등 수치 필드가 빈 문자열("") 또는 null 상태일 때, `integer` 변환을 시도해서 예외가 발생했습니다.
-
-**문제 원인**
-
-- Logstash는 빈 값에 대해 변환 실패 시 파이프라인 전체가 중단됩니다.
-
-**해결 방법**
-
-- 타입 변환 전 조건문으로 값 유효성 체크 추가
-    
-    ```ruby
-    if [총 소비금액] != "" {
-      mutate { convert => { "총 소비금액" => "integer" } }
-    }
-    ```
-    
+```ruby
+if [총 소비금액] != "" {
+  mutate { convert => { "총 소비금액" => "integer" } }
+}
+```
 
 ---
 
-### 6. Logstash 조건 비교 오류 (SEX_CD 변환)
+### 5. Logstash 조건 비교 오류 (SEX_CD 변환)
 
 **문제점**
 
@@ -338,8 +345,9 @@ filebeat.exe -e -c filebeat.yml
 
 ## 🌕 회고 및 소감
 
-외부 접근을 허용하려면 단순히 포트를 여는 것 이상으로 고려해야 할 설정이 많았다.
+외부 접근을 허용하려면 단순히 포트를 여는 것 이상으로 고려해야 할 설정이 많았습니다.
 
-또한 실제 데이터를 시각화하면서 **타입 변환, 필드 명명, 값 유효성** 등 사소해 보이던 요소들이 분석 정확도에 큰 영향을 준다는 걸 느꼈다.
+또한 실제 데이터를 시각화하면서 **타입 변환, 필드 명명, 값 유효성** 등 사소해 보이던 요소들이 분석 정확도에 큰 영향을 준다는 걸 느꼈습니다.
 
-csv 파일의 칼럼을 logstash로 변환해올 때 칼럼명을 실제 작업할 때 알아보기 더 쉬운 이름으로 바꾸면 시각화하기 좀 더 편리했을 것 같다.
+csv 파일의 칼럼을 logstash로 변환해올 때 칼럼명을 실제 작업할 때 알아보기 더 쉬운 이름으로 바꾸면 시각화하기 좀 더 편리했을 것 같습니다.
+
