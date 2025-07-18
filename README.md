@@ -36,7 +36,7 @@ Ubuntu 가상 머신에 ELK 스택(Elasticsearch, Logstash, Kibana)을 설치하
 | **Filebeat (v7.11.2)** | CSV 로그 파일을 실시간으로 전송 |
 | **Ubuntu (v24.04.2)** | ELK 파이프라인 구축을 위한 가상 환경 |
 
-> ✅ VirtualBox는 "브리지 어댑터"로 설정하여 동일 네트워크에서 접속 가능하게 구성했습니다.
+> VirtualBox는 "브리지 어댑터"로 설정하여 동일 네트워크에서 접속 가능하게 구성했습니다.
 
 ---
 
