@@ -1,15 +1,16 @@
 # Plz Don't Go
 <img src="./image/logo.png" alt="logo" height="300" />
 
-Ubuntu 가상 머신에 ELK 스택(Elasticsearch, Logstash, Kibana)을 설치하여 카드 데이터에 대한 시각화를 진행했습니다.
-
 Life Stage (대학생, 신혼, 은퇴자 등) 기준으로 분기별 소비 건수 추이를 통해 이탈 가능성이 있는 소비층을 분석했습니다.
 
-> ✅ Filebeat → Logstash → Elasticsearch → Kibana 파이프라인을 구축
+
+Ubuntu 가상 머신에 ELK 스택(Elasticsearch, Logstash, Kibana)을 설치하여 카드 데이터에 대한 시각화를 진행했습니다.
+
+> Filebeat → Logstash → Elasticsearch → Kibana 파이프라인을 구축
 > 
-> ✅ VirtualBox 기반 내부망(LAN) 접속
+> VirtualBox 기반 내부망(LAN) 접속
 > 
-> ✅ 보안 고려를 통해 공인 IP 포트는 열지 않음
+> 보안 고려를 통해 공인 IP 포트는 열지 않음
 > 
 
 ---
