@@ -66,21 +66,42 @@ Life Stage (대학생, 신혼, 은퇴자 등) 기준으로 분기별 소비 건�
   sudo systemctl enable elasticsearch
   sudo systemctl start elasticsearch
 
-  # Kibana 설치
-  wget <https://artifacts.elastic.co/downloads/kibana/kibana-7.11.2-amd64.deb>
-  sudo dpkg -i kibana-7.11.2-amd64.deb
-  sudo systemctl enable kibana
-
   # Logstash 설치
   wget <https://artifacts.elastic.co/downloads/logstash/logstash-7.11.2-amd64.deb>
   sudo dpkg -i logstash-7.11.2-amd64.deb
   sudo systemctl enable logstash
 
+  # Kibana 설치
+  wget <https://artifacts.elastic.co/downloads/kibana/kibana-7.11.2-amd64.deb>
+  sudo dpkg -i kibana-7.11.2-amd64.deb
+  sudo systemctl enable kibana
   ```
+---
+
+### 2️⃣ Elasticsearch 외부 접속 설정
+  ```bash
+  sudo nano /etc/elasticsearch/elasticsearch.yml
+
+  # 노드 이름 지정
+  node.name: node-1
+
+  # 클러스터의 초기 마스터 노드 목록 설정
+  cluster.initial_master_nodes: ["node-1"]
+
+  # 외부에서 접속할 수 있도록 포트 설정
+  network.host: 0.0.0.0
+  http.port: 9200
+ 
+  ```
+ 설정 파일을 수정한 후 Elasticsearch를 재시작해야 적용됩니다
+ 
+```yaml
+sudo systemctl restart elasticsearch
+```
 
 ---
 
-### 2️⃣ Kibana 외부 접속 설정
+### 3️⃣ Kibana 외부 접속 설정
 
 ```bash
 sudo nano /etc/kibana/kibana.yml
@@ -94,7 +115,7 @@ server.host: "0.0.0.0"
 
 ---
 
-### 3️⃣ Logstash 설정
+### 4️⃣ Logstash 설정
 
 ```bash
 sudo nano /etc/logstash/conf.d/cardfisa.conf
@@ -165,7 +186,7 @@ sudo systemctl start logstash
 
 ---
 
-### 4️⃣ 방화벽 포트 열기 (UFW)
+### 5️⃣ 방화벽 포트 열기 (UFW)
 
 ```bash
 sudo ufw allow 5601
@@ -176,7 +197,7 @@ sudo ufw enable
 
 ---
 
-### 5️⃣ 팀원 PC에서 Filebeat 설정
+### 6️⃣ 팀원 PC에서 Filebeat 설정
 
 ```yaml
 # filebeat.yml (Windows)
@@ -199,7 +220,7 @@ filebeat.exe -e -c filebeat.yml
 
 ---
 
-### 6️⃣ Kibana 인덱스 패턴 등록
+### 7️⃣ Kibana 인덱스 패턴 등록
 
 - 브라우저에서 접속: `http://192.168.0.5:5601`
 - 좌측 메뉴 → **Discover**
